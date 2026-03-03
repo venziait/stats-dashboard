@@ -1,0 +1,26 @@
+{
+  "id": "size stats",
+  "comment": "required fields in query: nodeId, pagination(number), ",
+  "queries":[
+    {
+      "nodeId": "2ecd2808-1afd-4574-8d28-081afd95740c",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "documentos en el repositorio"
+    },
+    {
+      "nodeId": "8f2105b4-daaf-4874-9e8a-2152569d109b",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "documentos en el sitio swdsp"
+    },
+    {
+      "nodeId": "1a0b110f-1e09-4ca2-b367-fe25e4964a4e",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "peso de documento project contract pdf"
+    }
+  ],
+  "outputPathFolder": "'\\/app:company_home\\/cm:global-reports'",
+  "outputName": "size-report.json"
+}

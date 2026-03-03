@@ -1,0 +1,21 @@
+{
+  "id": "time graph stats",
+  "queries":[
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System",
+      "facetQueries":[
+        {"query": "created:[NOW-1DAY TO NOW]", "label": "today", "group": "1" },
+        {"query": "created:[NOW-2DAY TO NOW-1DAY]", "label": "yesterday", "group": "2" },
+        {"query": "created:[NOW-3DAY TO NOW-2DAY]", "label": "2 days ago", "group": "3" },
+        {"query": "created:[NOW-4DAY TO NOW-3DAY]", "label": "3 days ago", "group": "4" },
+        {"query": "created:[NOW-5DAY TO NOW-4DAY]", "label": "4 days ago", "group": "5" },
+        {"query": "created:[NOW-6DAY TO NOW-5DAY]", "label": "5 days ago", "group": "6" }
+      ],
+      "facetFields": [],
+    "outputType": "timeGraph",
+    "outputLabel": "documentos creados en la ultima semana"
+    }
+],
+  "outputPathFolder": "'\\/app:company_home\\/cm:global-reports'",
+  "outputName": "timeGraph-report.json"
+}

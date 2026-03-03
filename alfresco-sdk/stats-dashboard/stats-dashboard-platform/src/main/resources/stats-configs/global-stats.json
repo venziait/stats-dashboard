@@ -1,0 +1,42 @@
+{
+  "id": "global stats",
+  "queries":[
+    {
+      "query": "cm:creator:admin",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "documentos creados por admin"
+    },
+    {
+      "query": "* AND SITE:swsdp AND TYPE:'cm:content'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Numero de documentos en sitio: Sample web design site project"
+    },
+    {
+      "query": "* AND SITE:swsdp AND TYPE:'cm:folder'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Numero de carpetas en sitio: Sample web design site project"
+    },
+    {
+      "query": "* AND TYPE:'cm:person'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Numero de usuarios totales"
+    },
+    {
+      "query": "* AND TYPE:'venzia:statsConfig'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Numero de configuraciones de estadísticas"
+    }
+  ],
+  "outputPathFolder": "'\\/app:company_home\\/cm:global-reports'",
+  "outputName": "global-report.json"
+}
