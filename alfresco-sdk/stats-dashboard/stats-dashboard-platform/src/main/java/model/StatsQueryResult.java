@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.util.Pair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +17,13 @@ public class StatsQueryResult {
     ResultSet results; //search results
     /**Output resultset when outputType is of type size*/
     HashMap<String,String> sizeResultSet;
-    /**resultNumber || numberGraph || size */
+
+    List<TimeFacetedSearchResultSet> timeResultSets;
+
+    /**resultNumber || numberGraph || timeGraph|| size */
     String outputType;
     String outputLabel;
+    String outputSublabel;
     String outputIcon;
     String outputIconColor;
     String outputCardbgColor;
@@ -26,6 +32,7 @@ public class StatsQueryResult {
     boolean hasFacetQueries;
     /**Field to export from the buckets list*/
     String fieldOutput;
+    JSONObject searchConfig;
 
 
     public StatsQueryResult(ResultSet results, String outputType, String outputLabel) {
@@ -35,28 +42,38 @@ public class StatsQueryResult {
     }
 
     public StatsQueryResult(ResultSet results, JSONObject searchObject){
+        setCommonProperties(searchObject);
         this.results = results;
-        outputType = searchObject.getString("outputType");
-        outputLabel = searchObject.getString("outputLabel");
+        this.searchConfig = searchObject;
         hasFacetQueries = searchObject.has("hasFacetQueries") ? searchObject.getBoolean("hasFacetQueries") : false;
         fieldOutput = searchObject.has("fieldOutput") ? searchObject.getString("fieldOutput") : "";
-        outputIcon = searchObject.has("outputIcon") ? searchObject.getString("outputIcon") : "";
-        outputIconColor = searchObject.has("outputIconColor") ? searchObject.getString("outputIconColor") : "";
-        outputCardbgColor =  searchObject.has("outputCardbgColor") ? searchObject.getString("outputCardbgColor") : "";
-        outputTextColor =  searchObject.has("outputTextColor") ? searchObject.getString("outputTextColor") : "";
     }
 
     /**Constructor invoked when outputType is of type size */
     public StatsQueryResult(JSONObject searchObject, String size, long childs){
+        setCommonProperties(searchObject);
+        sizeResultSet = new HashMap<>();
+        sizeResultSet.put("\"size\"", "\""+size+"\"");
+        sizeResultSet.put("\"numOfFounds\"", "\""+String.valueOf(childs)+"\"");
+    }
+
+    public StatsQueryResult(List<TimeFacetedSearchResultSet> results, JSONObject searchObject){
+        setCommonProperties(searchObject);
+        this.timeResultSets = results;
+        this.searchConfig = searchObject;
+        hasFacetQueries = searchObject.has("hasFacetQueries") ? searchObject.getBoolean("hasFacetQueries") : false;
+        fieldOutput = searchObject.has("fieldOutput") ? searchObject.getString("fieldOutput") : "";
+    }
+
+    /**Extracts properties for all kind of graphs, labels, colors etc*/
+    public void setCommonProperties(JSONObject searchObject){
         outputType = searchObject.getString("outputType");
         outputLabel = searchObject.getString("outputLabel");
-        sizeResultSet = new HashMap<>();
-        sizeResultSet.put("size", size);
-        sizeResultSet.put("numOfFounds", String.valueOf(childs));
         outputIcon = searchObject.has("outputIcon") ? searchObject.getString("outputIcon") : "";
         outputIconColor = searchObject.has("outputIconColor") ? searchObject.getString("outputIconColor") : "";
         outputCardbgColor =  searchObject.has("outputCardbgColor") ? searchObject.getString("outputCardbgColor") : "";
         outputTextColor =  searchObject.has("outputTextColor") ? searchObject.getString("outputTextColor") : "";
+        outputSublabel =  searchObject.has("outputSublabel") ? searchObject.getString("outputSublabel") : "";
     }
 
     public ResultSet getResults() {
@@ -105,6 +122,7 @@ public class StatsQueryResult {
         jsonOutput.put("outputIconColor", outputIconColor);
         jsonOutput.put("outputCardbgColor", outputCardbgColor);
         jsonOutput.put("outputTextColor", outputTextColor);
+        jsonOutput.put("outputSublabel", outputSublabel);
         return jsonOutput;
     }
 
@@ -118,14 +136,22 @@ public class StatsQueryResult {
                 fieldsBuckets.forEach(pair  -> pair.setFirst("\""+pair.getFirst()+"\"")); //escaped commas for parsing with (JSON.parse(input.results[0].results)
                 return fieldsBuckets.toString().replace("(", "[").replace(")", "]");
             }else {
+                //output object
                 Map<String, Integer> facetQueries = results.getFacetQueries();
-                return facetQueries.toString();
+                List<Pair<String, Integer>> toPairs = new ArrayList<>();
+                for(Map.Entry<String,Integer> facet:facetQueries.entrySet()){
+                    toPairs.add(new Pair<>("\""+facet.getKey()+"\"", facet.getValue()));
+                }
+                return toPairs.toString().replace("(", "[").replace(")", "]");
             }
         }else if(outputType.equals(StatsTypes.TIME_GRAPH)){
-            //timegraph uses temporal facets queries just like numbergraph but facets are now always by date
-            //TODO: Handle facet order to show correctly in front
-            Map<String, Integer> facetQueries = results.getFacetQueries();
-            return facetQueries.toString();
+            JSONArray facetQueriesArr = new JSONArray();
+            timeResultSets.forEach(timeFacetedSearchResultSet -> {
+                JSONObject timeResultAsJsonObject = timeFacetedSearchResultSet.toJSONObject(searchConfig);
+                facetQueriesArr.put(timeResultAsJsonObject);
+            });
+            System.out.println(facetQueriesArr);
+            return facetQueriesArr.toString();
         }else if(outputType.equals(StatsTypes.SIZE)){
             return sizeResultSet.toString();
         }

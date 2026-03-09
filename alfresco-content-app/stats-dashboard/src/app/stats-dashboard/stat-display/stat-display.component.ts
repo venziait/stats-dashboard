@@ -58,7 +58,13 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
   constructor() { }
 
   ngOnInit(): void {
+    if(this.stat.outputType=="size"){ //results is an object: {size=12mb, numOfFounds=120}
+      this.stat.results=JSON.parse(this.stat.results.replace(/=/g, ":"));
+      console.log(this.stat)
+    }
   }
+
+  
 
   ngAfterViewInit(): void {
     if(this.stat.outputType=="numberGraph"){
@@ -71,15 +77,12 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
         type:'bar',
         data: {
           datasets:[{
-            label:"eeeee",
             data:resultsToChar,
             backgroundColor: getRandomPalete(), 
           }]
         },
         options:this.options 
       })
-      console.log(this.stat.results)
-      console.log(results)
     }
   }
 

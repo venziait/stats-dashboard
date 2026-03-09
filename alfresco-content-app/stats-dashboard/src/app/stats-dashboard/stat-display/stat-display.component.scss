@@ -55,12 +55,18 @@
     .result-number{
         font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         font-size: 40px;
+        margin-top: 5px;
     }
     .result-label{
         display: flex;
         max-width: 200px;
         font-size: 14px;
         text-align: end;
+    }
+
+    .result-sublabel{
+        margin-top: 10px;
+        font-size: 10px;
     }
 }
 

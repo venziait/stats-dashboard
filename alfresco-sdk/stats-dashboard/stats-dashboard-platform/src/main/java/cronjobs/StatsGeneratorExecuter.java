@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.StatsConfig;
 import model.StatsQueryResult;
 import model.StatsTypes;
+import model.TimeFacetedSearchResultSet;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
@@ -102,9 +103,7 @@ public class StatsGeneratorExecuter implements StatefulJob {
      * Uses search service to search: TYPE:venzia:statsConfig
      * */
     public ResultSet searchStatsConfigs(){
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_FTS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        SearchParameters sp = getDefaultSearchParameters();
         String query = "TYPE:\""+ VenziaModel.TYPE_STATS_CONFIG +"\"";
         sp.setQuery(query);
         sp.setMaxItems(1000);
@@ -127,13 +126,12 @@ public class StatsGeneratorExecuter implements StatefulJob {
     public StatsQueryResult getResultsForQuery(JSONObject searchObject){
         if(searchObject.getString("outputType").equals(StatsTypes.SIZE)){ //works diferent to other searches
            return getResultsForSizeQuery(searchObject);
+        }else if(searchObject.getString("outputType").equals(StatsTypes.TIME_GRAPH)){//handle faceting
+            return getResultsForTimeQuery(searchObject);
         }
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_FTS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        SearchParameters sp = getDefaultSearchParameters();
         String query = searchObject.getString("query");
         sp.setQuery(query);
-        sp.setIncludeMetadata(false);
         searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
             String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
             sp.addFacetQuery(formatedQuery);
@@ -186,6 +184,84 @@ public class StatsGeneratorExecuter implements StatefulJob {
         }
     }
 
+    /**Time search can be in 3 ways:<br>
+     * 1. a facet search, for example: documents created in the last week<br>
+     * 2. a facet GROUPED search, for example: documents created in the last week by creator, this is indicated by the field parameter in jsonConfig, only first field will be used<br>
+     * 3. a facet LIMITED search,this is when we know which filters we want,  in this case we use filterQuery in config and add a set of filterquerys, result will be like option 2
+     * but with this query instead of a automatic filter query: for example: documents created in the last week BY Site with [SITE:swdsp]<br>
+     * <br>IN the first case just a normal faceted search is launched, in the second case first  a fields query is launched. With that query we retrieve the diferent values for
+     * the property, for example: creator. The for each creator we launch a faceted search adding that value as a filterquery
+     * in both cases statsQueryResult will have a prop timeFacetResultSearch
+     * <br><code>
+     * [ {filter: filter, label: filter label, resultSet:SearchResultset} ,{label: filter label, resultSet:SearchResultset} ]</code>
+     * <br>so, for a creator query the resultset would be:
+     * <br><code>[
+     *   {filter:cm:creator, label: admin, resultSet: resusltet for a query with cm:creator=admin filter},
+     *   {filter:cm:creator, label: testUster, resultSet: resusltet for a query with cm:creator=testUser filter}
+     * ]</code>
+     * <br>If there is no filter filter will be empty and label will be outputLabel
+     * */
+    public StatsQueryResult getResultsForTimeQuery(JSONObject searchObject){
+        List<TimeFacetedSearchResultSet> timeFacetedSearchResultSets = new ArrayList<>();
+        SearchParameters sp = getDefaultSearchParameters();
+        String query = searchObject.getString("query");
+        sp.setQuery(query);
+        //-- if there is no field nor filter query
+        boolean hasFilterQueries= searchObject.has("filterQueries") || (searchObject.has("facetFields") && !searchObject.getJSONArray("facetFields").isEmpty());
+        if(!hasFilterQueries){
+            searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
+                String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
+                sp.addFacetQuery(formatedQuery);
+            });
+            searchObject.getJSONArray("facetFields").forEach(facetField -> {sp.addFieldFacet(new SearchParameters.FieldFacet(facetField.toString()));});
+            ResultSet outputObject = serviceRegistry.getSearchService().query(sp);
+            TimeFacetedSearchResultSet timeFacetedSearchResultSet = new TimeFacetedSearchResultSet("", searchObject.getString("outputLabel"), outputObject);
+            timeFacetedSearchResultSets.add(timeFacetedSearchResultSet);
+
+        }else{ //if there are filterqueries it will ignore facetfields
+            if(!searchObject.has("filterQueries")){
+                searchObject.getJSONArray("facetFields").forEach(facetField -> {sp.addFieldFacet(new SearchParameters.FieldFacet(facetField.toString()));});
+                searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
+                    String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
+                    sp.addFacetQuery(formatedQuery);
+                });
+                ResultSet outputObject = serviceRegistry.getSearchService().query(sp);
+                String fieldFacet = searchObject.getJSONArray("facetFields").getString(0);
+                outputObject.getFieldFacet(fieldFacet).forEach( (pair) -> { //search with the filter
+                    SearchParameters fieldSP = getDefaultSearchParameters();
+                    fieldSP.setQuery(query);
+                    searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
+                        String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
+                        fieldSP.addFacetQuery(formatedQuery);
+                    });
+                    fieldSP.addFilterQuery(fieldFacet+":\""+pair.getFirst()+"\"");
+                    ResultSet fieldRS = serviceRegistry.getSearchService().query(fieldSP);
+                    TimeFacetedSearchResultSet timeFacetedSearchResultSet = new TimeFacetedSearchResultSet(fieldFacet, pair.getFirst(), fieldRS);
+                    timeFacetedSearchResultSets.add(timeFacetedSearchResultSet);
+                });
+            }else{
+                JSONArray filterQueries = searchObject.getJSONArray("filterQueries");
+                filterQueries.forEach(filter -> {
+                    SearchParameters filterSP = getDefaultSearchParameters();
+                    filterSP.setQuery(query);
+                    searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
+                        String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
+                        filterSP.addFacetQuery(formatedQuery);
+                    });
+                    if(filter.getClass().equals(JSONObject.class)){
+                        filterSP.addFilterQuery(((JSONObject) filter).getString("query"));
+                        ResultSet filterRS = serviceRegistry.getSearchService().query(filterSP);
+                        TimeFacetedSearchResultSet timeFacetedSearchResultSet = new TimeFacetedSearchResultSet(((JSONObject) filter).getString("query"), ((JSONObject) filter).getString("label"),filterRS);
+                        timeFacetedSearchResultSets.add(timeFacetedSearchResultSet);
+                    }
+
+                });
+            }
+        }
+        StatsQueryResult queryResult = new StatsQueryResult(timeFacetedSearchResultSets, searchObject);
+        return  queryResult;
+    }
+
 
     /**@deprecated
      * slower, gives a higher value
@@ -212,13 +288,10 @@ public class StatsGeneratorExecuter implements StatefulJob {
      * in test for 424 docs this gives a time duration of 89ms and a size of 14.8mb,on average, speed is like half the nodeservice approach
      * */
     public long getNodeSizeWithSolr(NodeRef nodeRef, int skipCount, int length){
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_FTS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        SearchParameters sp = getDefaultSearchParameters();
         sp.setQuery("ANCESTOR:\"" + nodeRef.toString() + "\"");
         sp.setMaxItems(length);
         sp.setSkipCount(skipCount);
-        sp.setIncludeMetadata(false);
         long size = 0;
         ResultSet results = serviceRegistry.getSearchService().query(sp);
         for(ResultSetRow rs : results){
@@ -235,13 +308,18 @@ public class StatsGeneratorExecuter implements StatefulJob {
 
     /**query only to know how many results are*/
     public long getNodeAncestorChilds(NodeRef nodeRef){
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_FTS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        SearchParameters sp = getDefaultSearchParameters();
         sp.setQuery("ANCESTOR:\"" + nodeRef.toString() + "\"");
         sp.setMaxItems(1);
-        sp.setIncludeMetadata(false);
         return  serviceRegistry.getSearchService().query(sp).getNumberFound();
     }
 
+    /**Returns the basic search parameter object*/
+    public SearchParameters getDefaultSearchParameters(){
+        SearchParameters sp = new SearchParameters();
+        sp.setLanguage(SearchService.LANGUAGE_FTS_ALFRESCO);
+        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        sp.setIncludeMetadata(false);
+        return sp;
+    }
 }

@@ -1,3 +1,4 @@
+<!--Stats of type result number displays a card with the num of results and a icon -->
 <ng-container *ngIf="stat.outputType=='resultNumber'">
     <mat-card class="resultNumber-card" [style]="'background-color:'+getbgcolor()+' ;color:'+getTextColor()+';'">
         <mat-card-title>{{stat.outputLabel}}</mat-card-title>
@@ -13,6 +14,8 @@
         </mat-card-content>
     </mat-card>
 </ng-container> 
+
+<!--Stats of type number graph display a bar chart-->
 <ng-container *ngIf="stat.outputType=='numberGraph'">
     <mat-card class="numberGraph-card" [style]="'background-color:'+getbgcolor()+' ;color:'+getTextColor()+';'">
         <mat-card-title class="numberGraph-title">{{stat.outputLabel}}</mat-card-title>
@@ -20,5 +23,21 @@
             <canvas #chartCanvas  ></canvas>
         </mat-card-content>
     </mat-card>
-
 </ng-container>
+
+<!--Stats of type size display a card with size and number of docs-->
+<ng-container *ngIf="stat.outputType=='size'">
+    <mat-card class="resultNumber-card" [style]="'background-color:'+getbgcolor()+' ;color:'+getTextColor()+';'">
+        <mat-card-title>{{stat.outputLabel}}</mat-card-title>
+        <mat-card-content class="space-evenly">
+
+            <div class="stat-info">
+                <span class="result-number">{{stat.results.size}}</span>
+                <span class="result-sublabel" *ngIf="stat.outputSublabel != ''">{{stat.results.numOfFounds}} {{stat.outputSublabel}}</span>
+            </div>
+            <div class="right-icon">
+                <mat-icon [style]="'color:'+getIconColor()+';'">{{getIcon()}}</mat-icon>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</ng-container> 
