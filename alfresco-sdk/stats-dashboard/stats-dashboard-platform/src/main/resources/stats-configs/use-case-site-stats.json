@@ -1,0 +1,103 @@
+{
+  "id": "Site reports",
+  "comment": "based on this reports uses cases https://connect.hyland.com/t5/alfresco-forum/alfresco-25-3-monitoring-stats-suggestion/td-p/496468",
+  "outputPathFolder": "'\\/app:company_home\\/st:sites\\/cm:monitoring-use-case\\/cm:documentLibrary\\/cm:stats_x0020_reports'",
+  "outputName": "sites-report.json",
+  "queries":[
+    {
+      "query": "TYPE:'cm:content' AND SITE:swsdp",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Documents in SWDSP",
+      "outputIcon": "insert_drive_file",
+      "outputIconColor": "#ea792e",
+      "outputCardbgColor": "#36322d",
+      "outputTextColor": "#ea792e"
+    },
+    {
+      "nodeId": "8f2105b4-daaf-4874-9e8a-2152569d109b",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "Memory usage of swsdp Site",
+      "outputSublabel": "documents in swsdp",
+      "outputIcon": "data_usage",
+      "outputIconColor": "#ea792e",
+      "outputCardbgColor": "#36322d",
+      "outputTextColor": "#ea792e"
+    },
+    {
+      "query": "TYPE:'cm:content' AND SITE:monitoring-use-case",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Documents in monitoring use case site",
+      "outputIcon": "insert_drive_file",
+      "outputIconColor": "#36322d",
+      "outputCardbgColor": "#ea792e",
+      "outputTextColor": "#36322d"
+    },
+    {
+      "nodeId": "88d6a69d-7d16-423e-96a6-9d7d16323e82",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "Memory usage of monitoring use case Site",
+      "outputSublabel": "documents in monitoring use case site",
+      "outputIcon": "data_usage",
+      "outputIconColor": "#36322d",
+      "outputCardbgColor": "#ea792e",
+      "outputTextColor": "#36322d"
+    },
+    {
+      "query": "TYPE:'cm:content' AND SITE:testsite",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Documents in testsite",
+      "outputIcon": "insert_drive_file",
+      "outputIconColor": "#ea792e",
+      "outputCardbgColor": "#125e82",
+      "outputTextColor": "#ea792e"
+    },
+    {
+      "nodeId": "40385de9-4df4-4bb8-b85d-e94df4bbb826",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "Memory usage of test site Site",
+      "outputSublabel": "documents in test site",
+      "outputIcon": "data_usage",
+      "outputIconColor": "#ea792e",
+      "outputCardbgColor": "#125e82",
+      "outputTextColor": "#ea792e"
+    },
+    {
+      "query": "TYPE:'cm:content' AND SITE:swsdp",
+      "facetQueries":[],
+      "facetFields":["content.mimetype"],
+      "hasFacetQueries": false,
+      "fieldOutput": "content.mimetype",
+      "outputType": "numberGraph",
+      "outputLabel": "documents by myimetype in swsdp",
+      "outputIcon": "folder"
+    },
+    {
+      "query": "TYPE:'cm:content' AND SITE:monitoring-use-case",
+      "facetQueries":[],
+      "facetFields":["content.mimetype"],
+      "hasFacetQueries": false,
+      "fieldOutput": "content.mimetype",
+      "outputType": "numberGraph",
+      "outputLabel": "documents by myimetype in monitoring use case site",
+      "outputIcon": "folder"
+    },
+    {
+      "query": "TYPE:'cm:content' AND SITE:testsite",
+      "facetQueries":[],
+      "facetFields":["content.mimetype"],
+      "hasFacetQueries": false,
+      "fieldOutput": "content.mimetype",
+      "outputType": "numberGraph",
+      "outputLabel": "documents by myimetype in testsite"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "id": "Activity reports",
+  "comment": "based on this reports uses cases https://connect.hyland.com/t5/alfresco-forum/alfresco-25-3-monitoring-stats-suggestion/td-p/496468",
+  "outputPathFolder": "'\\/app:company_home\\/st:sites\\/cm:monitoring-use-case\\/cm:documentLibrary\\/cm:stats_x0020_reports'",
+  "outputName": "activity-report.json",
+  "queries":[
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System",
+      "facetQueries":[
+        {"query": "created:[NOW-7DAY TO NOW]", "label": "last week", "order": 7},
+        {"query": "created:[NOW-14DAY TO NOW-7DAY]", "label": "2 weeks ago" , "order": 6},
+        {"query": "created:[NOW-21DAY TO NOW-14DAY]", "label": "3 weeks ago" , "order": 5},
+        {"query": "created:[NOW-28DAY TO NOW-21DAY]", "label": "4 weeks ago" , "order": 4},
+        {"query": "created:[NOW-35DAY TO NOW-28DAY]", "label": "5 weeks ago", "order": 3},
+        {"query": "created:[NOW-42DAY TO NOW-35DAY]", "label": "6 weeks ago", "order": 2},
+        {"query": "created:[NOW-49DAY TO NOW-42DAY]", "label": "7 weeks ago", "order": 1},
+        {"query": "created:[NOW-56DAY TO NOW-49DAY]", "label": "8 weeks ago", "order": 0}
+      ],
+      "facetFields": [],
+      "outputType": "timeGraph",
+      "outputLabel": "Documents created in last 60 Days"
+    },
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System",
+      "facetQueries":[
+        {"query": "modified:[NOW-7DAY TO NOW]", "label": "last week", "order": 7},
+        {"query": "modified:[NOW-14DAY TO NOW-7DAY]", "label": "2 weeks ago" , "order": 6},
+        {"query": "modified:[NOW-21DAY TO NOW-14DAY]", "label": "3 weeks ago" , "order": 5},
+        {"query": "modified:[NOW-28DAY TO NOW-21DAY]", "label": "4 weeks ago" , "order": 4},
+        {"query": "modified:[NOW-35DAY TO NOW-28DAY]", "label": "5 weeks ago", "order": 3},
+        {"query": "modified:[NOW-42DAY TO NOW-35DAY]", "label": "6 weeks ago", "order": 2},
+        {"query": "modified:[NOW-49DAY TO NOW-42DAY]", "label": "7 weeks ago", "order": 1},
+        {"query": "modified:[NOW-56DAY TO NOW-49DAY]", "label": "8 weeks ago", "order": 0}
+      ],
+      "facetFields": [],
+      "outputType": "timeGraph",
+      "outputLabel": "Documents modified in last 60 Days"
+    },
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System",
+      "facetQueries":[
+        {"query": "created:[NOW-1DAY TO NOW]", "label": "today", "order": 5},
+        {"query": "created:[NOW-2DAY TO NOW-1DAY]", "label": "yesterday" , "order": 4},
+        {"query": "created:[NOW-3DAY TO NOW-2DAY]", "label": "2 days ago" , "order": 3},
+        {"query": "created:[NOW-4DAY TO NOW-3DAY]", "label": "3 days ago" , "order": 2},
+        {"query": "created:[NOW-5DAY TO NOW-4DAY]", "label": "4 days ago", "order": 1},
+        {"query": "created:[NOW-6DAY TO NOW-5DAY]", "label": "5 days ago", "order": 0}
+      ],
+      "filterQueries": [
+        {"query":"SITE:swsdp", "label": "swsdp"},
+        {"query": "SITE:testsite", "label":  "Test site"},
+        {"query": "SITE:monitoring-use-case", "label":  "Monitoring use case"}],
+      "outputType": "timeGraph",
+      "outputLabel": "Document creation by Site and date"
+    },
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System AND SITE:monitoring-use-case",
+      "facetQueries":[
+        {"query": "created:[NOW-1DAY TO NOW]", "label": "today", "order": 5},
+        {"query": "created:[NOW-2DAY TO NOW-1DAY]", "label": "yesterday" , "order": 4},
+        {"query": "created:[NOW-3DAY TO NOW-2DAY]", "label": "2 days ago" , "order": 3},
+        {"query": "created:[NOW-4DAY TO NOW-3DAY]", "label": "3 days ago" , "order": 2},
+        {"query": "created:[NOW-5DAY TO NOW-4DAY]", "label": "4 days ago", "order": 1},
+        {"query": "created:[NOW-6DAY TO NOW-5DAY]", "label": "5 days ago", "order": 0}
+      ],
+      "facetFields": ["creator"],
+      "outputType": "timeGraph",
+      "outputLabel": "Document creation in example site by User"
+    },
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System AND SITE:monitoring-use-case",
+      "facetQueries":[
+        {"query": "modified:[NOW-1DAY TO NOW]", "label": "today", "order": 5},
+        {"query": "modified:[NOW-2DAY TO NOW-1DAY]", "label": "yesterday" , "order": 4},
+        {"query": "modified:[NOW-3DAY TO NOW-2DAY]", "label": "2 days ago" , "order": 3},
+        {"query": "modified:[NOW-4DAY TO NOW-3DAY]", "label": "3 days ago" , "order": 2},
+        {"query": "modified:[NOW-5DAY TO NOW-4DAY]", "label": "4 days ago", "order": 1},
+        {"query": "modified:[NOW-6DAY TO NOW-5DAY]", "label": "5 days ago", "order": 0}
+      ],
+      "facetFields": ["modifier"],
+      "outputType": "timeGraph",
+      "outputLabel": "Document modification in example site by User"
+    }
+  ]
+}

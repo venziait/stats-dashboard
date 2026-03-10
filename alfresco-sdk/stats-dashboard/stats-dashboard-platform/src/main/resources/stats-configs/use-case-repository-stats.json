@@ -1,0 +1,54 @@
+{
+  "id": "Repository reports",
+  "comment": "based on this reports uses cases https://connect.hyland.com/t5/alfresco-forum/alfresco-25-3-monitoring-stats-suggestion/td-p/496468",
+  "outputPathFolder": "'\\/app:company_home\\/st:sites\\/cm:monitoring-use-case\\/cm:documentLibrary\\/cm:stats_x0020_reports'",
+  "outputName": "repository-report.json",
+  "queries":[
+    {
+      "nodeId": "2ecd2808-1afd-4574-8d28-081afd95740c",
+      "pagination": 1000,
+      "outputType": "size",
+      "outputLabel": "Total storage used in the repository",
+      "outputSublabel": "Elements in the repository",
+      "outputIcon": "data_usage",
+      "outputIconColor": "#3c493f",
+      "outputCardbgColor": "#c8e087",
+      "outputTextColor": "#3c493f"
+    },
+    {
+      "query": "TYPE:'cm:content' ",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Total documents in repository",
+      "outputIcon": "poll",
+      "outputIconColor": "#3c493f",
+      "outputCardbgColor": "#c8e087",
+      "outputTextColor": "#3c493f"
+    },
+    {
+      "query": "TYPE:'cm:folder'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Total folders in repository",
+      "outputIcon": "folder",
+      "outputIconColor": "#3c493f",
+      "outputCardbgColor": "#c8e087",
+      "outputTextColor": "#3c493f"
+    },
+    {
+      "query": "TYPE:'cm:content'",
+      "facetQueries":[],
+      "facetFields":["content.mimetype"],
+      "hasFacetQueries": false,
+      "fieldOutput": "content.mimetype",
+      "outputType": "numberGraph",
+      "outputLabel": "documents by myimetype",
+      "outputIcon": "folder",
+      "outputIconColor": "#3c493f",
+      "outputCardbgColor": "#c8e087",
+      "outputTextColor": "#3c493f"
+    }
+  ]
+}

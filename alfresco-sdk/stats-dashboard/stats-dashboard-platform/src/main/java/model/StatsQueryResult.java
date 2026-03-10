@@ -150,7 +150,6 @@ public class StatsQueryResult {
                 JSONObject timeResultAsJsonObject = timeFacetedSearchResultSet.toJSONObject(searchConfig);
                 facetQueriesArr.put(timeResultAsJsonObject);
             });
-            System.out.println(facetQueriesArr);
             return facetQueriesArr.toString();
         }else if(outputType.equals(StatsTypes.SIZE)){
             return sizeResultSet.toString();

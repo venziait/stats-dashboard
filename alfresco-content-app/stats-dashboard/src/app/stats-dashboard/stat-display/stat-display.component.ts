@@ -73,8 +73,7 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
     if(this.stat.outputType=="numberGraph"){
       let results = [];
       results = JSON.parse(this.stat.results);
-      let resultsToChar = results.map( result => {
-        return {x:result[0], y:result[1]}});
+      let resultsToChar = results.map( result => { return {x:result[0], y:result[1]} });
       this.options.plugins.title.text = this.stat.outputLabel
       let chart = new Chart(this.chartCanvas.nativeElement,{
         type:'bar',
@@ -86,14 +85,11 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
         },
         options:this.options 
       })
-    }else if(this.stat.outputType=="timeGraph"){
-      //time graph is [ {dataset1}, {dataSet2} ]
+    }else if(this.stat.outputType=="timeGraph"){//time graph is [ {dataset1}, {dataSet2} ]
       let results =  [];
       results = JSON.parse(this.stat.results);
       let labels = Object.keys(results[0])//use param order to extract array of labels and sort
-      labels = labels.sort( (labelA, labelB) => {
-        return results[0][labelA].order > results[0][labelB].order ? 1 : -1 
-      });
+      labels = labels.sort( (labelA, labelB) =>  results[0][labelA].order > results[0][labelB].order ? 1 : -1 );
       let dataset = []; //[ {label, data} , {label, data} ];
       let colors = getRandomPalete();
       let indexColor = 0;
