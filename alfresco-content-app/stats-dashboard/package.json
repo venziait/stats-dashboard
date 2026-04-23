@@ -12,7 +12,7 @@
     "test": "ng test app",
     "postinstall": "ngcc"
   },
-  "private": true, 
+  "private": true,
   "dependencies": {
     "@alfresco/adf-content-services": "6.1.0",
     "@alfresco/adf-core": "6.1.0",
@@ -35,8 +35,7 @@
     "@ngx-translate/core": "^14.0.0",
     "chart.js": "^4.5.1",
     "cropperjs": "1.5.12",
-    "minimatch": "^3.0.4",
-    "minimatch-browser": "1.0.0",
+    "minimatch": "npm:minimatch-browser@1.0.0",
     "moment-es6": "^1.0.0",
     "pdfjs-dist": "3.3.122",
     "rxjs": "^6.6.3",

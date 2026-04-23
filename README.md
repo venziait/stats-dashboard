@@ -78,6 +78,15 @@ mandatory parameters
     "pagination": 1000
 }
 ```
+
+The following well known Alfresco aliases are also supported in place of a nodeId.
+
+```sh
+-root-
+-shared-
+-my-
+```
+
 ![image](images/size-preview.png)
 
 

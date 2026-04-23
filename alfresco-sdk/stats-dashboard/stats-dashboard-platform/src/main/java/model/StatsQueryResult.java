@@ -1,16 +1,13 @@
 package model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Each query in the configs will be launched, and it results saved as StatQueryResult Class
@@ -131,17 +128,27 @@ public class StatsQueryResult {
         if(outputType.equals(StatsTypes.RESULT_NUMBER)){
             return String.valueOf(results.getNumberFound());
         }else if(outputType.equals(StatsTypes.NUMBER_GRAPH) || outputType.equals(StatsTypes.DOUGHNUT_CHART)){
+            JSONArray chartResults = new JSONArray();
 
             if(!hasFacetQueries){ //output contains result from fieldFacet
                 List<Pair<String, Integer>> fieldsBuckets = results.getFieldFacet(fieldOutput);
-                fieldsBuckets.forEach(pair  -> pair.setFirst("\""+pair.getFirst()+"\"")); //escaped commas for parsing with (JSON.parse(input.results[0].results)
-                return fieldsBuckets.toString().replace("(", "[").replace(")", "]");
+                fieldsBuckets.forEach(pair -> {
+                    JSONArray point = new JSONArray();
+                    point.put(pair.getFirst());
+                    point.put(pair.getSecond());
+                    chartResults.put(point);
+                });
             }else {//output contains results from facetQueries
                 Map<String, Integer> facetQueries = results.getFacetQueries();
-                List<Pair<String, Integer>> toPairs = new ArrayList<>();
-                for(Map.Entry<String,Integer> facet:facetQueries.entrySet()){toPairs.add(new Pair<>("\""+facet.getKey()+"\"", facet.getValue()));}
-                return toPairs.toString().replace("(", "[").replace(")", "]");
+                for(Map.Entry<String,Integer> facet:facetQueries.entrySet()){
+                    JSONArray point = new JSONArray();
+                    point.put(facet.getKey());
+                    point.put(facet.getValue());
+                    chartResults.put(point);
+                }
             }
+
+            return chartResults.toString();
         }else if(outputType.equals(StatsTypes.TIME_GRAPH)){
             JSONArray facetQueriesArr = new JSONArray();
             timeResultSets.forEach(timeFacetedSearchResultSet -> {

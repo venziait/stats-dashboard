@@ -6,6 +6,7 @@ import model.StatsQueryResult;
 import model.StatsTypes;
 import model.TimeFacetedSearchResultSet;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -13,6 +14,8 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
+
+import org.alfresco.util.ISO9075;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import utils.BytesToReadableConverter;
@@ -36,7 +39,7 @@ public class StatGeneratorHelper {
      * */
     public ResultSet searchStatsConfigs(){
         SearchParameters sp = getDefaultSearchParameters();
-        String query = "TYPE:\""+ VenziaModel.TYPE_STATS_CONFIG +"\"";
+        String query = "TYPE:\""+ VenziaModel.TYPE_STATS_CONFIG +"\" AND -ASPECT:\"sys:archived\"";
         sp.setQuery(query);
         sp.setMaxItems(1000);
         return serviceRegistry.getSearchService().query(sp);
@@ -55,14 +58,14 @@ public class StatGeneratorHelper {
      * Uses the query definition to parse and launch search service
      * */
     public StatsQueryResult getResultsForQuery(JSONObject searchObject){
-        if(searchObject.getString("outputType").equals(StatsTypes.SIZE)){ //works diferent to other searches
+        if(searchObject.getString("outputType").equals(StatsTypes.SIZE)){ //works different to other searches
             return getResultsForSizeQuery(searchObject);
         }else if(searchObject.getString("outputType").equals(StatsTypes.TIME_GRAPH)){//handle faceting
             return getResultsForTimeQuery(searchObject);
         }
         //default search for other types
         SearchParameters sp = getDefaultSearchParameters();
-        String query = searchObject.getString("query");
+        String query = expandWellKnownAliasesInQuery(searchObject.getString("query"));
         sp.setQuery(query);
         searchObject.getJSONArray("facetQueries").forEach(facetQuery -> {
             String formatedQuery = getFormatedFacetQuery( (JSONObject) facetQuery);
@@ -156,7 +159,7 @@ public class StatGeneratorHelper {
     public StatsQueryResult getResultsForTimeQuery(JSONObject searchObject){
         List<TimeFacetedSearchResultSet> timeFacetedSearchResultSets = new ArrayList<>();
         SearchParameters sp = getDefaultSearchParameters();
-        String query = searchObject.getString("query");
+        String query = expandWellKnownAliasesInQuery(searchObject.getString("query"));
         sp.setQuery(query);
         //-- if there is no field nor filter query
         boolean hasFilterQueries= searchObject.has("filterQueries") || (searchObject.has("facetFields") && !searchObject.getJSONArray("facetFields").isEmpty());
@@ -201,7 +204,7 @@ public class StatGeneratorHelper {
                         filterSP.addFacetQuery(formatedQuery);
                     });
                     if(filter.getClass().equals(JSONObject.class)){
-                        filterSP.addFilterQuery(((JSONObject) filter).getString("query"));
+                        filterSP.addFilterQuery(expandWellKnownAliasesInQuery(((JSONObject) filter).getString("query")));
                         ResultSet filterRS = serviceRegistry.getSearchService().query(filterSP);
                         TimeFacetedSearchResultSet timeFacetedSearchResultSet = new TimeFacetedSearchResultSet(((JSONObject) filter).getString("query"), ((JSONObject) filter).getString("label"),filterRS);
                         timeFacetedSearchResultSets.add(timeFacetedSearchResultSet);
@@ -220,7 +223,10 @@ public class StatGeneratorHelper {
     public StatsQueryResult getResultsForSizeQuery(JSONObject searchObject){
         if(searchObject.has("nodeId")){
             String id = searchObject.getString("nodeId");
-            NodeRef ancestor = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
+            NodeRef ancestor = resolveWellKnownAliasNodeRef(id);
+            if (ancestor == null) {
+                ancestor = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id);
+            }
             if(!serviceRegistry.getNodeService().exists(ancestor)){throw new RuntimeException("Node not found");}
             long size;
             String formatedSize;
@@ -249,11 +255,63 @@ public class StatGeneratorHelper {
     public String getFormatedFacetQuery(JSONObject facetQuery){
         if(facetQuery.getClass().equals(JSONObject.class)){
             String label = facetQuery.getString("label");
-            String facetQ = facetQuery.getString("query");
+            String facetQ = expandWellKnownAliasesInQuery(facetQuery.getString("query"));
             facetQ = "{!afts key='" + label + "'}" + facetQ;
             return facetQ;
         }
         return "";
+    }
+
+    /**
+     * Expands well-known aliases used in stat queries.
+     */
+    public String expandWellKnownAliasesInQuery(String query) {
+        if (query == null || query.isEmpty()) {
+            return query;
+        }
+
+        String expanded = query;
+        expanded = expanded.replace("-root-", "/app:company_home");
+        expanded = expanded.replace("-shared-", "/app:company_home/cm:Shared");
+
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        if (runAsUser != null && !runAsUser.isEmpty()) {
+            expanded = expanded.replace("-my-", "/app:company_home/cm:User_x0020_Homes/cm:" + ISO9075.encode(runAsUser));
+        }
+
+        return expanded;
+    }
+
+    /**
+     * Resolves well-known aliases when used as nodeId values.
+     */
+    public NodeRef resolveWellKnownAliasNodeRef(String nodeIdOrAlias) {
+        if ("-root-".equals(nodeIdOrAlias)) {
+            return findNodeByPath("/app:company_home");
+        }
+        if ("-shared-".equals(nodeIdOrAlias)) {
+            return findNodeByPath("/app:company_home/cm:Shared");
+        }
+        if ("-my-".equals(nodeIdOrAlias)) {
+            String runAsUser = AuthenticationUtil.getRunAsUser();
+            if (runAsUser == null || runAsUser.isEmpty()) {
+                return null;
+            }
+            return findNodeByPath("/app:company_home/cm:User_x0020_Homes/cm:" + ISO9075.encode(runAsUser));
+        }
+        return null;
+    }
+
+    private NodeRef findNodeByPath(String path) {
+        ResultSet resultSet = serviceRegistry.getSearchService().query(
+            StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+            SearchService.LANGUAGE_FTS_ALFRESCO,
+            buildPathQuery(path)
+        );
+        if (resultSet.length() == 0) {
+            return null;
+        }
+        return resultSet.getNodeRef(0);
     }
 
 
@@ -262,10 +320,10 @@ public class StatGeneratorHelper {
      * the statconfig object and the results
      * Gets or create the output json file and writes the output in it
      * */
-    public void saveJsonInPath(ResultSet folderPathSearch, StatsConfig config, Map<String, Object> jsonOutput){
-        NodeRef prevExist = serviceRegistry.getNodeService().getChildByName(folderPathSearch.getNodeRef(0), ContentModel.ASSOC_CONTAINS, config.getOutputName());
+    public void saveJsonInPath(NodeRef destinationFolder, StatsConfig config, Map<String, Object> jsonOutput){
+        NodeRef prevExist = serviceRegistry.getNodeService().getChildByName(destinationFolder, ContentModel.ASSOC_CONTAINS, config.getOutputName());
         if(prevExist == null){ //first creation
-            prevExist = serviceRegistry.getFileFolderService().create(folderPathSearch.getNodeRef(0), config.getOutputName(), VenziaModel.TYPE_STATS_REPORT).getNodeRef();
+            prevExist = serviceRegistry.getFileFolderService().create(destinationFolder, config.getOutputName(), VenziaModel.TYPE_STATS_REPORT).getNodeRef();
         }
         try {
             NodeRef workingCopy;
@@ -285,5 +343,73 @@ public class StatGeneratorHelper {
             serviceRegistry.getLockService().unlock(prevExist); //if fails avoid node locking
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Ensures the configured output path exists. Missing folders are created under Company Home.
+     * Returns the NodeRef of the target destination folder.
+     */
+    public NodeRef ensureOutputPathExists(String destinationFolderPath) {
+        String normalizedPath = normalizePath(destinationFolderPath);
+        NodeRef existingTarget = findNodeByPath(normalizedPath);
+        if (existingTarget != null) {
+            return existingTarget;
+        }
+
+        if (!normalizedPath.startsWith("/app:company_home")) {
+            throw new RuntimeException("Output path must start with /app:company_home. Received: " + destinationFolderPath);
+        }
+
+        NodeRef companyHome = findNodeByPath("/app:company_home");
+        if (companyHome == null) {
+            throw new RuntimeException("Could not resolve /app:company_home while creating output path: " + destinationFolderPath);
+        }
+
+        NodeRef current = companyHome;
+        String relativePath = normalizedPath.substring("/app:company_home".length());
+        String[] segments = relativePath.split("/");
+
+        for (String segment : segments) {
+            if (segment == null || segment.isEmpty()) {
+                continue;
+            }
+
+            String[] namespaceAndName = segment.split(":", 2);
+            String encodedName = namespaceAndName.length == 2 ? namespaceAndName[1] : namespaceAndName[0];
+            String folderName = ISO9075.decode(encodedName);
+
+            NodeRef child = serviceRegistry.getNodeService().getChildByName(current, ContentModel.ASSOC_CONTAINS, folderName);
+            if (child == null) {
+                child = serviceRegistry.getFileFolderService().create(current, folderName, ContentModel.TYPE_FOLDER).getNodeRef();
+            } else if (!serviceRegistry.getDictionaryService().isSubClass(serviceRegistry.getNodeService().getType(child), ContentModel.TYPE_FOLDER)) {
+                throw new RuntimeException("Path segment exists but is not a folder: " + folderName + " in " + destinationFolderPath);
+            }
+            current = child;
+        }
+
+        if (current == null || !serviceRegistry.getNodeService().exists(current)) {
+            throw new RuntimeException("Output path could not be created: " + destinationFolderPath);
+        }
+
+        return current;
+    }
+
+    private String normalizePath(String destinationFolderPath) {
+        String normalizedPath = destinationFolderPath;
+        if (normalizedPath == null || normalizedPath.trim().isEmpty()) {
+            throw new RuntimeException("Output path is empty");
+        }
+
+        normalizedPath = normalizedPath.trim();
+        while (normalizedPath.startsWith("'") && normalizedPath.endsWith("'")) {
+            normalizedPath = normalizedPath.substring(1, normalizedPath.length() - 1);
+        }
+
+        normalizedPath = normalizedPath.replace("\\/", "/");
+        return normalizedPath;
+    }
+
+    private String buildPathQuery(String normalizedPath) {
+        return "PATH:\"" + normalizedPath + "\"";
     }
 }

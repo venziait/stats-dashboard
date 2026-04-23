@@ -101,5 +101,17 @@
             </endpoint>
         </remote>
     </config>
-</alfresco-config>
 
+    <!--
+        Make custom types visible in "Change Type" and when creating rules.
+        Merged with out-of-the-box configured types.
+    -->
+    <config evaluator="string-compare" condition="DocumentLibrary">
+        <types>
+            <type name="cm:content">
+                <subtype name="venzia:statsConfig"/>
+                <subtype name="venzia:statsReport"/>
+            </type>
+        </types>
+    </config>
+</alfresco-config>

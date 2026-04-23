@@ -1,0 +1,30 @@
+{
+  "id": "Number graph stats",
+  "outputPathFolder": "'\\/app:company_home\\/cm:stats_x0020_reports'",
+  "outputName": "numberGraph-stats.json",
+  "queries": [
+    {
+      "query": "TYPE:'cm:content'",
+      "facetQueries": [],
+      "facetFields": ["creator"],
+      "hasFacetQueries": false,
+      "fieldOutput": "creator",
+      "outputType": "numberGraph",
+      "outputLabel": "documentos created by User"
+    },
+    {
+      "query": "* AND TYPE:'cm:content' AND -creator:System",
+      "facetQueries": [
+        { "query": "created:[NOW-1DAY TO NOW]", "label": "today" },
+        { "query": "created:[NOW-7DAY TO NOW]", "label": "last week" },
+        { "query": "created:[NOW/YEAR TO NOW]", "label": "last year" },
+        { "query": "created:[NOW-20YEAR TO NOW]", "label": "last 20 years" }
+      ],
+      "facetFields": ["created"],
+      "hasFacetQueries": true,
+      "fieldOutput": "creator",
+      "outputType": "numberGraph",
+      "outputLabel": "documentos creados por fecha"
+    }
+  ]
+}

@@ -41,4 +41,17 @@
         <property name="serviceRegistry" ref="ServiceRegistry" />
     </bean>
 
+    <bean id="venzia.StatsConfigFolderBootstrapComponent" class="venzia.platformsample.StatsConfigFolderBootstrapComponent" parent="module.baseComponent" >
+        <property name="moduleId" value="stats-dashboard-platform" />
+        <property name="name" value="StatsConfigFolderBootstrapComponentV3" />
+        <property name="description" value="Creates Data Dictionary/Stats Config bootstrap folder" />
+        <property name="sinceVersion" value="1.0" />
+        <property name="appliesFromVersion" value="0.99" />
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" />
+        <property name="fileFolderService" ref="FileFolderService" />
+        <property name="ruleService" ref="RuleService" />
+        <property name="actionService" ref="ActionService" />
+    </bean>
+
 </beans>
