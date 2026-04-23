@@ -1,54 +1,87 @@
 {
-  "id": "Repository reports",
+  "id": "Repository Statistics",
   "comment": "based on this reports uses cases https://connect.hyland.com/t5/alfresco-forum/alfresco-25-3-monitoring-stats-suggestion/td-p/496468",
-  "outputPathFolder": "'\\/app:company_home\\/st:sites\\/cm:monitoring-use-case\\/cm:documentLibrary\\/cm:stats_x0020_reports'",
+  "outputPathFolder": "'\\/app:company_home\\/cm:Stats_x0020_Reports'",
   "outputName": "repository-report.json",
-  "queries":[
+  "queries": [
     {
-      "nodeId": "2ecd2808-1afd-4574-8d28-081afd95740c",
+      "nodeId": "-root-",
       "pagination": 1000,
       "outputType": "size",
-      "outputLabel": "Total storage used in the repository",
+      "outputLabel": "Storage",
       "outputSublabel": "Elements in the repository",
       "outputIcon": "data_usage",
-      "outputIconColor": "#3c493f",
-      "outputCardbgColor": "#c8e087",
-      "outputTextColor": "#3c493f"
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
     },
     {
       "query": "TYPE:'cm:content' ",
-      "facetQueries":[],
-      "facetFields":[],
+      "facetQueries": [],
+      "facetFields": [],
       "outputType": "resultNumber",
-      "outputLabel": "Total documents in repository",
-      "outputIcon": "poll",
-      "outputIconColor": "#3c493f",
-      "outputCardbgColor": "#c8e087",
-      "outputTextColor": "#3c493f"
+      "outputLabel": "Documents",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
     },
     {
       "query": "TYPE:'cm:folder'",
-      "facetQueries":[],
-      "facetFields":[],
+      "facetQueries": [],
+      "facetFields": [],
       "outputType": "resultNumber",
-      "outputLabel": "Total folders in repository",
+      "outputLabel": "Folders",
       "outputIcon": "folder",
-      "outputIconColor": "#3c493f",
-      "outputCardbgColor": "#c8e087",
-      "outputTextColor": "#3c493f"
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "TYPE:'st:site'",
+      "facetQueries": [],
+      "facetFields": [],
+      "outputType": "resultNumber",
+      "outputLabel": "Sites",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "TYPE:'cm:person'",
+      "facetQueries": [],
+      "facetFields": [],
+      "outputType": "resultNumber",
+      "outputLabel": "Users",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "TYPE:'cm:authorityContainer'",
+      "facetQueries": [],
+      "facetFields": [],
+      "outputType": "resultNumber",
+      "outputLabel": "Groups",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
     },
     {
       "query": "TYPE:'cm:content'",
-      "facetQueries":[],
-      "facetFields":["content.mimetype"],
+      "facetQueries": [],
+      "facetFields": ["content.mimetype"],
       "hasFacetQueries": false,
       "fieldOutput": "content.mimetype",
       "outputType": "numberGraph",
-      "outputLabel": "documents by myimetype",
-      "outputIcon": "folder",
-      "outputIconColor": "#3c493f",
-      "outputCardbgColor": "#c8e087",
-      "outputTextColor": "#3c493f"
+      "outputLabel": "Documents by Mimetype",
+      "outputIcon": "poll",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
     }
   ]
 }

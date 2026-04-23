@@ -1,0 +1,62 @@
+{
+  "id": "global stats",
+  "queries":[
+    {
+      "query": "cm:creator:admin",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Documents Created by Admin",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "* AND SITE:swsdp AND TYPE:'cm:content'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Documents in SWSDP Site",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "* AND SITE:swsdp AND TYPE:'cm:folder'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Folders in SWSDP Site",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "* AND TYPE:'cm:person'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Total Users",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    },
+    {
+      "query": "* AND TYPE:'venzia:statsConfig'",
+      "facetQueries":[],
+      "facetFields":[],
+      "outputType": "resultNumber",
+      "outputLabel": "Number of Statistics Configurations",
+      "outputIcon": "dashboard",
+      "outputIconColor": "#212121",
+      "outputCardbgColor": "#fffffa",
+      "outputTextColor": "#0000008a"
+    }
+  ],
+  "outputPathFolder": "'\\/app:company_home\\/cm:global-reports'",
+  "outputName": "global-report.json"
+}

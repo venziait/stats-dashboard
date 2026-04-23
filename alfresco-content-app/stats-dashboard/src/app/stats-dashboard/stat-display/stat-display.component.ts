@@ -11,10 +11,10 @@ Chart.register(Colors);
   styleUrls: ['./stat-display.component.scss']
 })
 
-/**Stats dashboard pases each stat to this component, this handles the parsing and rendering */
+/**Stats dashboard passes each stat to this component, this handles the parsing and rendering */
 export class StatDisplayComponent implements OnInit, AfterViewInit {
 
-  @Input("stat") stat; //object {outputLabel, outputType, results} diferent outputType can have diferent props
+  @Input("stat") stat; //object {outputLabel, outputType, results} different outputType can have different props
   defaultIcon="dashboard";
   defaultIconColor="#212121";
   defaultBgColor="#fff";
@@ -52,7 +52,7 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
       }
     }
   };
-  
+
 
   @ViewChild('chartCanvas') chartCanvas:ElementRef<HTMLCanvasElement>;
   constructor() { }
@@ -63,7 +63,7 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
     }
   }
 
-  
+
 
   ngAfterViewInit(): void {
     this.initGraph();
@@ -90,10 +90,10 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
       data: {
         datasets:[{
           data:resultsToChar,
-          backgroundColor: getRandomPalete(), 
+          backgroundColor: getRandomPalete(),
         }]
       },
-      options:this.options 
+      options:this.options
     })
   }
 
@@ -110,11 +110,11 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
       data: {
         datasets:[{
           data:resultsData,
-          backgroundColor: getRandomPalete(), 
+          backgroundColor: getRandomPalete(),
         }],
         labels: resultsLabels
       },
-      options:this.options 
+      options:this.options
     })
   }
 
@@ -128,7 +128,7 @@ export class StatDisplayComponent implements OnInit, AfterViewInit {
       let indexColor = 0;
       results.forEach( (result, index) => {
         indexColor ++;
-        indexColor = indexColor > colors.length ? 0 : indexColor; //restart if array is oversized 
+        indexColor = indexColor > colors.length ? 0 : indexColor; //restart if array is oversized
         const resultLabel = result[labels[0]].label;
         const resultData = [];
         labels.forEach(label => {resultData.push(result[label].count )});

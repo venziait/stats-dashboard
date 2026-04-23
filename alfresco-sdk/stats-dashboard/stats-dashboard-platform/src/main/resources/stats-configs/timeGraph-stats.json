@@ -39,9 +39,9 @@
         {"query": "created:[NOW-5DAY TO NOW-4DAY]", "label": "4 days ago", "order": 1},
         {"query": "created:[NOW-6DAY TO NOW-5DAY]", "label": "5 days ago", "order": 0}
       ],
+      "facetFields": [],
       "filterQueries": [
         {"query":"SITE:swsdp", "label": "swsdp"},
-        {"query": "SITE:testsite", "label":  "Test site"},
         {"query": "SITE:testsite", "label":  "Test site"}],
       "outputType": "timeGraph",
       "outputLabel": "documentos creados en la ultima semana por SITIO"
